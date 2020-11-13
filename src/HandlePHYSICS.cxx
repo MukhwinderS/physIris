@@ -58,7 +58,8 @@ Int_t useYCalc = 0;//Use calculated YY1 energy  : do we need to ? :Jaspreet
 Double_t PResid; //Momentum of residue
 Double_t PBeam; // Calculated beam momentum after scattering off Ag
 Double_t PA; //Beam momentum before reaction
-Double_t Pb1; //Light ejectile momentum
+Double_t Pb1;//Light ejectile momentum
+Double_t Ps1;
 Double_t Pb2; //Light ejectile momentum
 Double_t PbU; //Light ejectile momentum
 Double_t PbUSd; //Light ejectile momentum
@@ -85,9 +86,9 @@ Double_t ECsI1=sqrt(-1.);
 Double_t ECsI2=sqrt(-1.);
 Double_t EYY1=sqrt(-1.);
 Double_t Eb1=sqrt(-1.), Eb2=sqrt(-1.), EbU=sqrt(-1.), EbUSd=sqrt(-1.);
-Double_t EB1=sqrt(-1.), EB2=sqrt(-1.), EBU=sqrt(-1.), EBUSd=sqrt(-1.);
+Double_t EB1=sqrt(-1.), EB2=sqrt(-1.), EBU=sqrt(-1.), EBUSd=sqrt(-1.), Es1=sqrt(-1.);
 Double_t PB1=sqrt(-1.), PB2=sqrt(-1.), PBU=sqrt(-1.), PBUSd=sqrt(-1.);
-Double_t Q1=sqrt(-1.), Q2=sqrt(-1.), QU=sqrt(-1.), QUSd=sqrt(-1.);
+Double_t Q1=sqrt(-1.), Q2=sqrt(-1.), QU=sqrt(-1.), QUSd=sqrt(-1.),QS=sqrt(-1.);
 Double_t Pb1y=sqrt(-1.), Pb2y=sqrt(-1.), PbUy=sqrt(-1.), PbUSdy=sqrt(-1.);
 Double_t Pb1xcm=sqrt(-1.), Pb2xcm=sqrt(-1.), PbUxcm=sqrt(-1.), PbUSdxcm=sqrt(-1.);
 
@@ -534,8 +535,9 @@ void HandlePHYSICS()
 				}
 				
 				det->TSdETot = energy;
+               			 Es1=energy;
 			}
-	
+			Ps1 = sqrt(Es1*Es1+2.*Es1*mB);
 			PResid = sqrt(2.*det->TSdETot*mA);     //Beam momentum in MeV/c
 			A = kBF-1.;                              //Quadratic equation parameters
 			B = 2.0*PResid* cos(TMath::DegToRad()*det->TSd1Theta.at(0));
@@ -546,11 +548,13 @@ void HandlePHYSICS()
 			IrisEvent->fA = A;
 			IrisEvent->fB = B;
 			IrisEvent->fC = C;
+			QS = mA+ma-mB- sqrt(mA*mA+mB*mB-ma*ma-2.*(mA+EBeam)*(mB+Es1)+2.*PA*Ps1*cos(det->TSd1Theta.at(0)*TMath::Pi()/180.)+2.*(EBeam+mA+ma-Es1-mB)*ma);
 			//to calculate residue energy from beam
 			IrisEvent->fEB=  det->TSdETot;
+			IrisEvent->fQsd = QS;
 			//IrisEvent->fEB=  IrisEvent->fEB + elossFi(det->TSdETot,geoP.FoilThickness/2.,eAAg,dedxAAg); //energy loss from the end of H2 to the center of Ag.
 			
-		        det->TSdThetaCM = TMath::RadToDeg()*atan(tan(TMath::DegToRad()*det->TSd1Theta.at(0))/sqrt(gammaCM-gammaCM*betaCM*(mA+IrisEvent->fEB)/(PBeam*cos(TMath::DegToRad()*det->TSd1Theta.at(0)))));// check if this is still correct for H2 target tk
+		       // det->TSdThetaCM = TMath::RadToDeg()*atan(tan(TMath::DegToRad()*det->TSd1Theta.at(0))/sqrt(gammaCM-gammaCM*betaCM*(mA+IrisEvent->fEB)/(PBeam*cos(TMath::DegToRad()*det->TSd1Theta.at(0)))));// check if this is still correct for H2 target tk
 		}
        
 		if (det->TYdEnergy.size()>0&&det->TYdRing.size()>0) {    //check if in the proton/deuteron YdCsIGate
